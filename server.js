@@ -13,12 +13,6 @@ mongoose
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Это ответ от сервера",
-  });
-});
-
 // Обработка роутов
 app.use(userRouter);
 
