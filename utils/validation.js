@@ -41,9 +41,18 @@ export const registerValidation = [
   body("avatarUrl", "Неверная ссылка на аватарку").optional().isURL(),
 ];
 
+// Валидация авторизации
 export const loginValidation = [
   body("email", "Неверный формат почты").isEmail(),
   body("password", "Пароль должен быть от 6 символо").isLength({ min: 6 }),
+];
+
+// Валидация создания поста
+export const createPostValidation = [
+  body("title", "Необходим заголовок").isString(),
+  body("text", "Необходим текст").isString(),
+  body("imageUrl", "Неверная ссылка на изображение").optional().isURL(),
+  body("tags", "Неверный формат тэгов").optional().isArray(),
 ];
 
 export const handleValidationErrors = (req, res, next) => {

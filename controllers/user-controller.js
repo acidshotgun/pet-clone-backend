@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import UserModel from "../models/User.js";
-import User from "../models/User.js";
 
 // Регистрация
 const register = async (req, res) => {
@@ -84,6 +83,11 @@ const login = async (req, res) => {
   }
 };
 
+// Проверка на авторизацию
+// checkAuth вшивает в req = userId с токеном (из local storage), который приходит в запросе
+// По этому userId ищем изера в БД
+// Если он есть то юзер авторизован в данный момент в приложении
+// И в ответе будут возвращены его данные, который будут записываться в стейт
 const auth = async (req, res) => {
   try {
     const user = await UserModel.findById(req.userId);
