@@ -151,7 +151,15 @@ const getOne = async (req, res) => {
       { _id: postId },
       { $inc: { viewCounter: 1 } },
       { new: true }
-    ).populate("author");
+    )
+      .populate("author")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "author",
+          select: "-passwordHash", // Исключить поле с паролем
+        },
+      });
 
     if (!updatedPost) {
       return res.status(404).json({

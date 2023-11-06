@@ -27,6 +27,9 @@ const UserSchema = new mongoose.Schema(
     createdDashboards: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Dashboard" },
     ],
+    createdComments: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Comments" },
+    ],
   },
   {
     timestamps: true,
