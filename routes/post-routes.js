@@ -17,6 +17,18 @@ router.post(
   PostController.create
 );
 
+// Удалить пост
+router.delete("/posts/:id", checkAuth, PostController.remove);
+
+// Обновить пост
+router.patch(
+  "/posts/:id",
+  checkAuth,
+  createPostValidation,
+  handleValidationErrors,
+  PostController.update
+);
+
 // Получить все посты
 router.get("/posts", PostController.getAll);
 

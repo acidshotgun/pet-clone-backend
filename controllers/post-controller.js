@@ -45,6 +45,86 @@ const create = async (req, res) => {
   }
 };
 
+// Изменить пост
+const update = async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      {
+        author: req.userId,
+        title: req.body.title,
+        text: req.body.text,
+        imageUrl: req.body.imageUrl,
+        tags: req.body.tags,
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!updatedPost) {
+      return res.status(400).json({
+        message: "Пост не найден",
+      });
+    }
+
+    res.json({
+      message: `Пост ${postId} изменен`,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось изменить пост",
+    });
+  }
+};
+
+// Удаление поста
+const remove = async (req, res) => {
+  const deletePostSessoin = await mongoose.startSession();
+  deletePostSessoin.startTransaction();
+
+  try {
+    const postId = req.params.id;
+
+    const deletedPost = await PostModel.findByIdAndDelete(postId).session(
+      deletePostSessoin
+    );
+
+    if (!deletedPost) {
+      return res.status(400).json({
+        message: "Пост не найден",
+      });
+    }
+
+    await UserModel.findByIdAndUpdate(
+      req.userId,
+      { $pull: { createdPosts: postId } },
+      { new: true }
+    ).session(deletePostSessoin);
+
+    // fake error
+    // const testUser = await UserModel.findById(10).session(deletePostSessoin);
+
+    await deletePostSessoin.commitTransaction();
+    deletePostSessoin.endSession();
+
+    res.json({
+      message: "Пост удален",
+    });
+  } catch (error) {
+    await deletePostSessoin.abortTransaction();
+    deletePostSessoin.endSession();
+
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось удалить пост",
+    });
+  }
+};
+
 // Получение всех постов
 const getAll = async (req, res) => {
   try {
@@ -82,10 +162,10 @@ const getOne = async (req, res) => {
     res.json(updatedPost);
   } catch (error) {
     console.log(error);
-    res.status(400).json({
+    res.status(500).json({
       message: "Не удалось получить посты",
     });
   }
 };
 
-export { create, getAll, getOne };
+export { create, remove, update, getAll, getOne };

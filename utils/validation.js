@@ -49,8 +49,26 @@ export const loginValidation = [
 
 // Валидация создания поста
 export const createPostValidation = [
-  body("title", "Необходим заголовок").isString(),
-  body("text", "Необходим текст").isString(),
+  body("title")
+    .isString()
+    .withMessage("Необходимо указать заголовок")
+    .custom((value, { req }) => {
+      if (typeof value !== "undefined" && value.length < 3) {
+        throw new Error("Заголовок должен содержать минимум три символа");
+      }
+
+      return true;
+    }),
+  body("text")
+    .isString()
+    .withMessage("Необходим текст")
+    .custom((value, { req }) => {
+      if (typeof value !== "undefined" && value.length < 3) {
+        throw new Error("Текст должен содержать минимум три символа");
+      }
+
+      return true;
+    }),
   body("imageUrl", "Неверная ссылка на изображение").optional().isURL(),
   body("tags", "Неверный формат тэгов").optional().isArray(),
 ];
