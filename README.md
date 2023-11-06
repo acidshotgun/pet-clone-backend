@@ -4,6 +4,7 @@
 
 - [x] Коды ответа HTTP
 - [x] await newPost.save(`{ createPostSession }`); - неверно | await newPost.save(`{ session: createPostSession }`); - верно
+- [x] `const postId = req.params.id;` - получить параметр из запроса (напр. `localhost/:id`) 
 
 # ЧТО?
 
