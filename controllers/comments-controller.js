@@ -129,15 +129,35 @@ const remove = async (req, res) => {
   }
 };
 
-// const update = async (req, res) => {
-//   try {
-//   } catch (error) {
-//     console.log(error);
+const update = async (req, res) => {
+  try {
+    const commentId = req.params.comment_id;
 
-//     res.status(400).json({
-//       message: "Не удалось отредактировать комментарий.",
-//     });
-//   }
-// };
+    const updatedComment = await CommentsModel.findByIdAndUpdate(
+      commentId,
+      {
+        text: req.body.text,
+        imageUrl: req.body.imageUrl,
+      },
+      {
+        new: true,
+      }
+    );
 
-export { create, remove };
+    if (!updatedComment) {
+      return res.status(400).json({
+        message: `Комментарий ${commentId} не найден.`,
+      });
+    }
+
+    res.json(updatedComment);
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      message: "Не удалось отредактировать комментарий.",
+    });
+  }
+};
+
+export { create, remove, update };

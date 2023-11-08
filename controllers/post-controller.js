@@ -46,12 +46,31 @@ const create = async (req, res) => {
   }
 };
 
-// Изменить пост
+// Изменить пост + проверка на авторство
+//    1)
 const update = async (req, res) => {
   try {
     const postId = req.params.id;
+    const userId = req.userId;
 
-    const updatedPost = await PostModel.findByIdAndUpdate(
+    // Проверка, что именно автор пытается изменить свой пост
+    // Сравниеваем id из токена и id автора поста
+    const postForUpdate = await PostModel.findById(postId);
+
+    if (!postForUpdate) {
+      return res.status(400).json({
+        message: `Пост ${postId} не найден.`,
+      });
+    }
+
+    // toString() иначе там будет new ObjectId("id автора")
+    if (postForUpdate.author.toString() !== userId) {
+      return res.status(400).json({
+        message: "Вы не можете изменить этот пост.",
+      });
+    }
+
+    await PostModel.findByIdAndUpdate(
       postId,
       {
         author: req.userId,
@@ -65,12 +84,6 @@ const update = async (req, res) => {
       }
     );
 
-    if (!updatedPost) {
-      return res.status(400).json({
-        message: "Пост не найден",
-      });
-    }
-
     res.json({
       message: `Пост ${postId} изменен`,
     });
@@ -82,24 +95,38 @@ const update = async (req, res) => {
   }
 };
 
-// Удаление поста
+// Удаление поста + проверки
+//    1) Существиует ли пост
+//    2) Пост удаляет его автор или нет
+//    3) Удаление поста
+//    4) Обновление юзера (удалить этот пост из массива его постов)
+// Это все под транзакциями
 const remove = async (req, res) => {
   const deletePostSessoin = await mongoose.startSession();
   deletePostSessoin.startTransaction();
 
   try {
     const postId = req.params.id;
+    const userId = req.userId;
 
-    const deletedPost = await PostModel.findByIdAndDelete(postId).session(
-      deletePostSessoin
-    );
+    const deletedPost = await PostModel.findById(postId);
 
     if (!deletedPost) {
       return res.status(400).json({
-        message: "Пост не найден",
+        message: "Пост не найден.",
       });
     }
 
+    // Проверка, что пост удаляет именно его автор
+    if (deletedPost.author.toString() !== userId) {
+      return res.status(400).json({
+        message: "Вы не являетесь автором поста.",
+      });
+    }
+
+    await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
+
+    // МОЖЕТ СТОИТ СДЕЛАТЬ ПРОВЕРКУ НА ЮЗЕРА?
     await UserModel.findByIdAndUpdate(
       req.userId,
       { $pull: { createdPosts: postId } },

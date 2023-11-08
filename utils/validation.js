@@ -73,6 +73,21 @@ export const createPostValidation = [
   body("tags", "Неверный формат тэгов").optional().isArray(),
 ];
 
+// Валидация создания комментариев
+export const createCommentValidation = [
+  body("text")
+    .isString()
+    .withMessage("Необходим текст")
+    .custom((value, { req }) => {
+      if (typeof value !== "undefined" && value.length > 800) {
+        throw new Error("Комментарий не должен быть длиннее 800 символов");
+      }
+
+      return true;
+    }),
+  body("imageUrl", "Неверная ссылка на изображение").optional().isURL(),
+];
+
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
 
