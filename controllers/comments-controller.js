@@ -4,6 +4,7 @@ import CommentsModel from "../models/Comments.js";
 import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
 
+// Создание коммента
 const create = async (req, res) => {
   const createCommentSession = await mongoose.startSession();
   createCommentSession.startTransaction();
@@ -39,11 +40,12 @@ const create = async (req, res) => {
     //   createCommentSession
     // );
 
-    await UserModel.findByIdAndUpdate(
-      req.userId,
-      { $push: { createdComments: createdComment._id } },
-      { new: true }
-    ).session(createCommentSession);
+    // ============ НЕ РАБОТАЕТ =================
+    // await UserModel.findByIdAndUpdate(
+    //   req.userId,
+    //   { $push: { createdComments: createdComment._id } },
+    //   { new: true }
+    // ).session(createCommentSession);
 
     await createCommentSession.commitTransaction();
     createCommentSession.endSession();
@@ -95,17 +97,17 @@ const remove = async (req, res) => {
       });
     }
 
-    const commentAuthor = await UserModel.findByIdAndUpdate(
-      authorId,
-      { $pull: { createdComments: commentId } },
-      { new: true }
-    ).session(deleteCommentSession);
+    // const commentAuthor = await UserModel.findByIdAndUpdate(
+    //   authorId,
+    //   { $pull: { createdComments: commentId } },
+    //   { new: true }
+    // ).session(deleteCommentSession);
 
-    if (!commentAuthor) {
-      return res.status(400).json({
-        message: `Пользователь ${authorId} не найден.`,
-      });
-    }
+    // if (!commentAuthor) {
+    //   return res.status(400).json({
+    //     message: `Пользователь ${authorId} не найден.`,
+    //   });
+    // }
 
     // Удаление самого коммента
     await CommentsModel.findByIdAndDelete(commentId).session(
@@ -129,9 +131,11 @@ const remove = async (req, res) => {
   }
 };
 
+// Изменение коммента
 const update = async (req, res) => {
   try {
     const commentId = req.params.comment_id;
+    const userId = req.userId;
 
     const updatedComment = await CommentsModel.findByIdAndUpdate(
       commentId,
