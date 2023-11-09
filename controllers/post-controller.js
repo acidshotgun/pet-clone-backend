@@ -47,7 +47,10 @@ const create = async (req, res) => {
 };
 
 // Изменить пост + проверка на авторство
-//    1)
+//    1) Запрос к БД, чтобы увидеть его автора и сравнить
+//          автор поста === авторизированный юзер => ОК
+//    2) Проверить наличие поста - не лишнее
+//    3) Изменить пост
 const update = async (req, res) => {
   try {
     const postId = req.params.id;
@@ -126,7 +129,6 @@ const remove = async (req, res) => {
 
     await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
 
-    // МОЖЕТ СТОИТ СДЕЛАТЬ ПРОВЕРКУ НА ЮЗЕРА?
     await UserModel.findByIdAndUpdate(
       req.userId,
       { $pull: { createdPosts: postId } },
