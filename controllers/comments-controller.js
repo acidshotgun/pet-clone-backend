@@ -85,6 +85,12 @@ const remove = async (req, res) => {
       });
     }
 
+    if (deletedComment.author.toString() !== authorId) {
+      return res.status(400).json({
+        message: `Вы не автор комментария.`,
+      });
+    }
+
     const postWithDeletedComment = await PostModel.findByIdAndUpdate(
       postId,
       { $pull: { comments: commentId } },
@@ -97,6 +103,7 @@ const remove = async (req, res) => {
       });
     }
 
+    // НЕ РАБОТАЮТ КОММЕНТЫ У ЮЗЕРА (НЕ УДАЛЯЮТСЯ ВМЕСТЕ С ПОСТОМ)
     // const commentAuthor = await UserModel.findByIdAndUpdate(
     //   authorId,
     //   { $pull: { createdComments: commentId } },

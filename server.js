@@ -5,6 +5,7 @@ import "dotenv/config";
 import userRouter from "./routes/user-routes.js";
 import postRouter from "./routes/post-routes.js";
 import commentsRouter from "./routes/comments-routes.js";
+import dashboardRouter from "./routes/dashboards-routes.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(userRouter);
 app.use(postRouter);
 app.use(commentsRouter);
+app.use(dashboardRouter);
 
 app.listen(process.env.PORT, (error) => {
   error

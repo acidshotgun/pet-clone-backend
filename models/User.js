@@ -25,7 +25,15 @@ const UserSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Dashboard" },
     ],
     createdDashboards: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Dashboard" },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Dashboard",
+        role: {
+          type: String,
+          enum: ["admin", "moderator", "member"],
+          default: "admin",
+        },
+      },
     ],
     createdComments: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Comments" },

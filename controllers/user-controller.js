@@ -43,7 +43,9 @@ const register = async (req, res) => {
 // Логгирование (заходит когда)
 const login = async (req, res) => {
   try {
-    const user = await UserModel.findOne({ email: req.body.email });
+    const user = await UserModel.findOne({ email: req.body.email }).populate(
+      "createdDashboards"
+    );
 
     if (!user) {
       return res.status(400).json({

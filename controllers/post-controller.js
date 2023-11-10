@@ -130,7 +130,7 @@ const remove = async (req, res) => {
     await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
 
     await UserModel.findByIdAndUpdate(
-      req.userId,
+      userId,
       { $pull: { createdPosts: postId } },
       { new: true }
     ).session(deletePostSessoin);
