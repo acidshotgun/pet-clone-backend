@@ -19,6 +19,13 @@ router.post(
   handleValidationErrorsForDashboards,
   DasboardController.create
 );
+// Удаление
+router.delete(
+  "/dashboards/:dashboard_id",
+  checkAuth,
+  checkUserRole,
+  DasboardController.remove
+);
 // Изменение
 router.patch(
   "/dashboards/:dashboard_id",

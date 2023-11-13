@@ -4,6 +4,9 @@ import DasboardModel from "../models/Dasboard.js";
 import UserModel from "../models/User.js";
 
 // Создание борда
+// При созздании так же:
+//    1) автор = первый подписчик
+//    2) автор = имеет созданный борд
 const create = async (req, res) => {
   const createDashboardSession = await mongoose.startSession();
   createDashboardSession.startTransaction();
@@ -29,7 +32,12 @@ const create = async (req, res) => {
 
     await UserModel.findByIdAndUpdate(
       author,
-      { $push: { createdDashboards: createdDashboard._id } },
+      {
+        $push: {
+          createdDashboards: createdDashboard._id,
+          subscribedDashboards: createdDashboard._id,
+        },
+      },
       { new: true }
     );
 
@@ -48,6 +56,54 @@ const create = async (req, res) => {
   }
 };
 
+// Удаление борда
+//    1) Удаляет так же данные о посте у создателя (подписки / созданныеборды)
+
+//  TODO:
+//    1) Сообщество удалено === ststus deleted???
+const remove = async (req, res) => {
+  const deleteDashboardSession = await mongoose.startSession();
+  deleteDashboardSession.startTransaction();
+
+  try {
+    const dashboard = req.params.dashboard_id;
+    const isAdmin = req.isAdmin;
+    const userId = req.userId;
+
+    if (isAdmin !== "admin") {
+      return res.status(400).json({
+        message: "Нет прав на удаление борда",
+      });
+    }
+
+    const deletedDashboard = await DasboardModel.findByIdAndDelete(
+      dashboard
+    ).session(deleteDashboardSession);
+
+    await UserModel.findByIdAndUpdate(userId, {
+      $pull: {
+        createdDashboards: deletedDashboard._id,
+        subscribedDashboards: deletedDashboard._id,
+      },
+    }).session(deleteDashboardSession);
+
+    await deleteDashboardSession.commitTransaction();
+    deleteDashboardSession.endSession();
+
+    res.json({
+      message: "Борд удален.",
+    });
+  } catch (error) {
+    await deleteDashboardSession.abortTransaction();
+    deleteDashboardSession.endSession();
+
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось удалить борд.",
+    });
+  }
+};
+
 const update = async (req, res) => {
   try {
     const result = req.body;
@@ -61,4 +117,4 @@ const update = async (req, res) => {
   }
 };
 
-export { create, update };
+export { create, update, remove };
