@@ -17,6 +17,7 @@ const create = async (req, res) => {
       description: req.body.description,
       logoUrl: req.body.logoUrl,
       backgroundUrl: req.body.backgroundUrl,
+      members: author,
       admins: [{ user: author, role: "admin", description: "Создатель" }],
     });
 
