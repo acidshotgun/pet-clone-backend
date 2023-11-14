@@ -30,6 +30,12 @@ const DashboardSchema = new mongoose.Schema(
         description: String,
       },
     ],
+    status: {
+      type: String,
+      enum: ["active", "blocked", "deleted"],
+      default: "active",
+    },
+    discussions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Discussion" }],
   },
   {
     timestamps: true,

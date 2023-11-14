@@ -1,5 +1,5 @@
 import express from "express";
-import * as CommentsController from "../controllers/comments-controller.js";
+import * as CommentController from "../controllers/comment-controller.js";
 import checkAuth from "../utils/checkAuth.js";
 import {
   createCommentValidation,
@@ -14,7 +14,7 @@ router.post(
   checkAuth,
   createCommentValidation,
   handleValidationErrors,
-  CommentsController.create
+  CommentController.create
 );
 // Редактирование
 router.patch(
@@ -22,13 +22,13 @@ router.patch(
   checkAuth,
   createCommentValidation,
   handleValidationErrors,
-  CommentsController.update
+  CommentController.update
 );
 // Удаление
 router.delete(
   "/posts/:post_id/comments/:comment_id",
   checkAuth,
-  CommentsController.remove
+  CommentController.remove
 );
 
 export default router;

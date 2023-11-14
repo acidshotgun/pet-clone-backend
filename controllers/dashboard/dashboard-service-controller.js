@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-import DasboardModel from "../models/Dasboard.js";
-import UserModel from "../models/User.js";
+import DasboardModel from "../../models/Dasboard.js";
+import UserModel from "../../models/User.js";
 
 // Создание борда
 // При созздании так же:
@@ -66,7 +66,7 @@ const remove = async (req, res) => {
   deleteDashboardSession.startTransaction();
 
   try {
-    const dashboard = req.params.dashboard_id;
+    const dashboardId = req.params.dashboard_id;
     const isAdmin = req.isAdmin;
     const userId = req.userId;
 
@@ -77,7 +77,7 @@ const remove = async (req, res) => {
     }
 
     const deletedDashboard = await DasboardModel.findByIdAndDelete(
-      dashboard
+      dashboardId
     ).session(deleteDashboardSession);
 
     await UserModel.findByIdAndUpdate(userId, {
@@ -104,11 +104,37 @@ const remove = async (req, res) => {
   }
 };
 
+// Изменение борда
 const update = async (req, res) => {
   try {
-    const result = req.body;
+    const dashboardId = req.params.dashboard_id;
+    const isAdmin = req.isAdmin;
 
-    res.json(result);
+    if (isAdmin !== "admin") {
+      return res.status(400).json({
+        message: "Нет прав на удаление борда",
+      });
+    }
+
+    const dashboardForUpdate = await DasboardModel.findById(dashboardId);
+
+    if (!dashboardForUpdate) {
+      return res.status(400).json({
+        message: `Борд ${postId} не найден.`,
+      });
+    }
+
+    await DasboardModel.findByIdAndUpdate(dashboardForUpdate, {
+      dashboardName: req.body.dashboardName,
+      // author: author,
+      description: req.body.description,
+      logoUrl: req.body.logoUrl,
+      backgroundUrl: req.body.backgroundUrl,
+    });
+
+    res.json({
+      message: `Борд ${dashboardId} изменен.`,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -117,4 +143,41 @@ const update = async (req, res) => {
   }
 };
 
-export { create, update, remove };
+// Получить один борд
+const getOne = async (req, res) => {
+  try {
+    const dashboardId = req.params.dashboard_id;
+
+    const dashboard = await DasboardModel.findById(dashboardId)
+      .populate({
+        path: "author",
+        select: "-passwordHash",
+      })
+      .populate({
+        path: "members",
+        select: "-passwordHash",
+      })
+      .populate({
+        path: "admins",
+        populate: {
+          path: "user",
+          select: "-passwordHash", // Исключить поле с паролем
+        },
+      });
+
+    if (!dashboard) {
+      return res.status(400).json({
+        message: `Борд ${dashboardId} не найден.`,
+      });
+    }
+
+    res.json(dashboard);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось получить борд.",
+    });
+  }
+};
+
+export { create, update, remove, getOne };

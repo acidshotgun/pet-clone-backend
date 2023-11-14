@@ -25,12 +25,12 @@ export default async (req, res, next) => {
     } catch (error) {
       console.log(error);
       res.status(403).json({
-        message: "Нет прав на удаление этого сообщества.",
+        message: "Нет прав.",
       });
     }
   } else {
     res.status(403).json({
-      message: "Нет прав на удаление этого сообщества.",
+      message: "Нет прав.",
     });
   }
 };

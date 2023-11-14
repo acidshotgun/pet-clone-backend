@@ -35,9 +35,7 @@ const UserSchema = new mongoose.Schema(
         },
       },
     ],
-    createdComments: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Comments" },
-    ],
+    createdComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   },
   {
     timestamps: true,

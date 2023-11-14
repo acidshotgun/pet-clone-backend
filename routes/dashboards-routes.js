@@ -1,5 +1,5 @@
 import express from "express";
-import * as DasboardController from "../controllers/dashboard-controller.js";
+import * as DasboardController from "../controllers/dashboard/dashboard-service-controller.js";
 
 import checkAuth from "../utils/checkAuth.js";
 import checkUserRole from "../utils/checkUserRole.js";
@@ -31,7 +31,11 @@ router.patch(
   "/dashboards/:dashboard_id",
   checkAuth,
   checkUserRole,
+  createDashboardValidation,
+  handleValidationErrorsForDashboards,
   DasboardController.update
 );
 
+// ПОлучить один борд
+router.get("/dashboards/:dashboard_id", DasboardController.getOne);
 export default router;

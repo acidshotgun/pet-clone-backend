@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import CommentsModel from "../models/Comments.js";
+import CommentModel from "../models/Comment.js";
 import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
 
@@ -12,7 +12,7 @@ const create = async (req, res) => {
   try {
     const postId = req.params.id;
 
-    const newComment = new CommentsModel({
+    const newComment = new CommentModel({
       author: req.userId,
       text: req.body.text,
       imageUrl: req.body.imageUrl,
@@ -76,7 +76,7 @@ const remove = async (req, res) => {
     // Сначала проверяется наличие коммента
     //    (без сессии иначе она падает в случае ошибки)
     // Если ОК идем дальше
-    const deletedComment = await CommentsModel.findById(commentId);
+    const deletedComment = await CommentModel.findById(commentId);
 
     // Проверка наличия коммента
     if (!deletedComment) {

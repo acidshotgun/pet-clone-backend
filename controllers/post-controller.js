@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
-import CommentsModel from "../models/Comments.js";
+import CommentModel from "../models/Comment.js";
 
 // Создание поста
 // + добавление поста юзеру в его БД
@@ -136,7 +136,7 @@ const remove = async (req, res) => {
     ).session(deletePostSessoin);
 
     // Удалить все комменты, у которых postId === postId (id поста)
-    await CommentsModel.deleteMany({ postId: postId }).session(
+    await CommentModel.deleteMany({ postId: postId }).session(
       deletePostSessoin
     );
 
