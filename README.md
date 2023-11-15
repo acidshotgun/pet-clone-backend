@@ -27,6 +27,18 @@
 - [ ] Операции с контентом ( посты / обсуждения / подписки и тд )
 <br>
 
-- [x] checkUserRole - проверка роли для изменения борда (есть в utils) 
+- [x] checkUserRole - проверка роли для изменения борда (есть в utils)
+
+<br>
+<br>
+<hr>
+
+# API
+
+<h3>Auth</h3>
+
+- [ ] reg - `POST "/auth/register"` 
+- [ ] login - `POST "/auth/login"` 
+- [ ] auth - `GET "/auth/me"` - 
 
 
