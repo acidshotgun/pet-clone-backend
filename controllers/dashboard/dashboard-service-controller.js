@@ -180,4 +180,34 @@ const getOne = async (req, res) => {
   }
 };
 
-export { create, update, remove, getOne };
+// Получить много
+const getAll = async (req, res) => {
+  try {
+    const boards = await DasboardModel.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "author",
+        select: "-passwordHash",
+      })
+      .populate({
+        path: "members",
+        select: "-passwordHash",
+      })
+      .populate({
+        path: "admins",
+        populate: {
+          path: "user",
+          select: "-passwordHash", // Исключить поле с паролем
+        },
+      });
+
+    res.json(boards);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось получить борды.",
+    });
+  }
+};
+
+export { create, update, remove, getOne, getAll };

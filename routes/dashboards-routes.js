@@ -38,4 +38,7 @@ router.patch(
 
 // ПОлучить один борд
 router.get("/dashboards/:dashboard_id", DasboardController.getOne);
+
+// ПОлучить Все борды
+router.get("/dashboards", DasboardController.getAll);
 export default router;
