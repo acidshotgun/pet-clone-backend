@@ -18,7 +18,7 @@ router.post(
 );
 
 // Удалить пост
-router.delete("/posts/:id", checkAuth, PostController.remove);
+router.delete("/posts/:post_id", checkAuth, PostController.remove);
 
 // Обновить пост
 router.patch(

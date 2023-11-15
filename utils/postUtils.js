@@ -50,12 +50,18 @@ const removePost = async (postId, authorId, PostModel, AuthorModel) => {
     const deletedPost = await PostModel.findById(postId);
 
     if (!deletedPost) {
-      throw new Error("Пост не найден.");
+      return {
+        success: false,
+        message: "Пост не найден.",
+      };
     }
 
     // Проверка, что пост удаляет именно его автор / само сообщество
     if (deletedPost.author.toString() !== authorId) {
-      throw new Error("Только автор или сообщество может удалить пост.");
+      return {
+        success: false,
+        message: "Только автор или сообщество может удалять посты.",
+      };
     }
 
     await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
@@ -72,16 +78,25 @@ const removePost = async (postId, authorId, PostModel, AuthorModel) => {
     );
 
     // fake error
-    // const testUser = await UserModel.findById(10).session(deletePostSessoin);
+    // const testUser = await AuthorModel.findById(10).session(deletePostSessoin);
 
     await deletePostSessoin.commitTransaction();
     deletePostSessoin.endSession();
+
+    return {
+      success: true,
+      message: `Пост ${postId} удален.`,
+    };
   } catch (error) {
     await deletePostSessoin.abortTransaction();
     deletePostSessoin.endSession();
 
     console.log(error);
-    throw new Error("Не удалось удалить пост.");
+
+    return {
+      success: false,
+      message: `Не удалось удалить пост ${postId}.`,
+    };
   }
 };
 

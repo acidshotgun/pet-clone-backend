@@ -19,21 +19,18 @@ const createDashboardPost = async (req, res) => {
 };
 
 const removeDashboardPost = async (req, res) => {
-  try {
-    const postId = req.params.post_id;
-    const authorId = req.params.dashboard_id;
+  const postId = req.params.post_id;
+  const authorId = req.params.dashboard_id;
 
-    const deletedPost = await removePost(
-      postId,
-      authorId,
-      PostModel,
-      DasboardModel
-    );
-    res.json({ message: `Пост ${postId} удален.` });
-  } catch (error) {
-    console.log(error);
+  const result = await removePost(postId, authorId, PostModel, DasboardModel);
+
+  if (result.success) {
+    res.json({
+      message: result.message,
+    });
+  } else {
     res.status(400).json({
-      message: "Не удалось удалить пост.",
+      message: result.message,
     });
   }
 };

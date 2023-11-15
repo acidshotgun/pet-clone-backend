@@ -1,9 +1,42 @@
-import mongoose from "mongoose";
 import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
 import CommentModel from "../models/Comment.js";
 
-import { createPost } from "../utils/postUtils.js";
+import { createPost, removePost } from "../utils/postUtils.js";
+
+// Создание поста
+const create = async (req, res) => {
+  try {
+    const authorId = req.userId; // req.params.dashboard_id
+    const data = req.body;
+
+    const post = await createPost(authorId, data, PostModel, UserModel);
+    res.json(post);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось создать пост.",
+    });
+  }
+};
+
+// Удаление поста
+const remove = async (req, res) => {
+  const authorId = req.userId;
+  const postId = req.params.post_id;
+
+  const result = await removePost(postId, authorId, PostModel, UserModel);
+
+  if (result.success) {
+    res.json({
+      message: result.message,
+    });
+  } else {
+    res.status(400).json({
+      message: result.message,
+    });
+  }
+};
 
 // Создание поста
 // + добавление поста юзеру в его БД
@@ -47,21 +80,6 @@ import { createPost } from "../utils/postUtils.js";
 //     });
 //   }
 // };
-
-const create = async (req, res) => {
-  try {
-    const authorId = req.userId; // req.params.dashboard_id
-    const data = req.body;
-
-    const post = await createPost(authorId, data, PostModel, UserModel);
-    res.json(post);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      message: "Не удалось создать пост.",
-    });
-  }
-};
 
 // Изменить пост + проверка на авторство
 //    1) Запрос к БД, чтобы увидеть его автора и сравнить
@@ -121,61 +139,62 @@ const update = async (req, res) => {
 //    3) Удаление поста
 //    4) Обновление юзера (удалить этот пост из массива его постов)
 // Это все под транзакциями
-const remove = async (req, res) => {
-  const deletePostSessoin = await mongoose.startSession();
-  deletePostSessoin.startTransaction();
 
-  try {
-    const postId = req.params.id;
-    const userId = req.userId;
+// const remove = async (req, res) => {
+//   const deletePostSessoin = await mongoose.startSession();
+//   deletePostSessoin.startTransaction();
 
-    const deletedPost = await PostModel.findById(postId);
+//   try {
+//     const postId = req.params.id;
+//     const userId = req.userId;
 
-    if (!deletedPost) {
-      return res.status(400).json({
-        message: "Пост не найден.",
-      });
-    }
+//     const deletedPost = await PostModel.findById(postId);
 
-    // Проверка, что пост удаляет именно его автор
-    if (deletedPost.author.toString() !== userId) {
-      return res.status(400).json({
-        message: "Вы не являетесь автором поста.",
-      });
-    }
+//     if (!deletedPost) {
+//       return res.status(400).json({
+//         message: "Пост не найден.",
+//       });
+//     }
 
-    await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
+//     // Проверка, что пост удаляет именно его автор
+//     if (deletedPost.author.toString() !== userId) {
+//       return res.status(400).json({
+//         message: "Вы не являетесь автором поста.",
+//       });
+//     }
 
-    await UserModel.findByIdAndUpdate(
-      userId,
-      { $pull: { createdPosts: postId } },
-      { new: true }
-    ).session(deletePostSessoin);
+//     await PostModel.findByIdAndDelete(postId).session(deletePostSessoin);
 
-    // Удалить все комменты, у которых postId === postId (id поста)
-    await CommentModel.deleteMany({ postId: postId }).session(
-      deletePostSessoin
-    );
+//     await UserModel.findByIdAndUpdate(
+//       userId,
+//       { $pull: { createdPosts: postId } },
+//       { new: true }
+//     ).session(deletePostSessoin);
 
-    // fake error
-    // const testUser = await UserModel.findById(10).session(deletePostSessoin);
+//     // Удалить все комменты, у которых postId === postId (id поста)
+//     await CommentModel.deleteMany({ postId: postId }).session(
+//       deletePostSessoin
+//     );
 
-    await deletePostSessoin.commitTransaction();
-    deletePostSessoin.endSession();
+//     // fake error
+//     // const testUser = await UserModel.findById(10).session(deletePostSessoin);
 
-    res.json({
-      message: "Пост удален",
-    });
-  } catch (error) {
-    await deletePostSessoin.abortTransaction();
-    deletePostSessoin.endSession();
+//     await deletePostSessoin.commitTransaction();
+//     deletePostSessoin.endSession();
 
-    console.log(error);
-    res.status(400).json({
-      message: "Не удалось удалить пост",
-    });
-  }
-};
+//     res.json({
+//       message: "Пост удален",
+//     });
+//   } catch (error) {
+//     await deletePostSessoin.abortTransaction();
+//     deletePostSessoin.endSession();
+
+//     console.log(error);
+//     res.status(400).json({
+//       message: "Не удалось удалить пост",
+//     });
+//   }
+// };
 
 // Получение всех постов
 const getAll = async (req, res) => {
