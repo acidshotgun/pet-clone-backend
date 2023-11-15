@@ -3,7 +3,7 @@ import * as PostController from "../controllers/post-controller.js";
 import {
   createPostValidation,
   handleValidationErrors,
-} from "../utils/validation.js";
+} from "../validation/validation.js";
 import checkAuth from "../utils/checkAuth.js";
 
 const router = express.Router();

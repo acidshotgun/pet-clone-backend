@@ -3,42 +3,59 @@ import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
 import CommentModel from "../models/Comment.js";
 
+import { createPost } from "../utils/postUtils.js";
+
 // Создание поста
 // + добавление поста юзеру в его БД
+// const create = async (req, res) => {
+//   const createPostSession = await mongoose.startSession();
+//   createPostSession.startTransaction();
+
+//   try {
+//     const newPost = new PostModel({
+//       author: req.userId,
+//       title: req.body.title,
+//       text: req.body.text,
+//       imageUrl: req.body.imageUrl,
+//       tags: req.body.tags,
+//     });
+
+//     const post = await newPost.save({ session: createPostSession });
+
+//     await post.populate("author");
+
+//     await UserModel.findByIdAndUpdate(
+//       req.userId,
+//       { $push: { createdPosts: post._id } },
+//       { new: true }
+//     ).session(createPostSession);
+
+//     // fake error
+//     // const testUser = await UserModel.findById(10).session(createPostSession);
+
+//     await createPostSession.commitTransaction();
+//     createPostSession.endSession();
+
+//     res.json(post);
+//   } catch (error) {
+//     await createPostSession.abortTransaction();
+//     createPostSession.endSession();
+
+//     console.log(error);
+//     res.status(400).json({
+//       message: "Не удалось создать пост.",
+//     });
+//   }
+// };
+
 const create = async (req, res) => {
-  const createPostSession = await mongoose.startSession();
-  createPostSession.startTransaction();
-
   try {
-    const newPost = new PostModel({
-      author: req.userId,
-      title: req.body.title,
-      text: req.body.text,
-      imageUrl: req.body.imageUrl,
-      tags: req.body.tags,
-    });
+    const authorId = req.userId; // req.params.dashboard_id
+    const data = req.body;
 
-    const post = await newPost.save({ session: createPostSession });
-
-    await post.populate("author");
-
-    await UserModel.findByIdAndUpdate(
-      req.userId,
-      { $push: { createdPosts: post._id } },
-      { new: true }
-    ).session(createPostSession);
-
-    // fake error
-    // const testUser = await UserModel.findById(10).session(createPostSession);
-
-    await createPostSession.commitTransaction();
-    createPostSession.endSession();
-
+    const post = await createPost(authorId, data, PostModel, UserModel);
     res.json(post);
   } catch (error) {
-    await createPostSession.abortTransaction();
-    createPostSession.endSession();
-
     console.log(error);
     res.status(400).json({
       message: "Не удалось создать пост.",

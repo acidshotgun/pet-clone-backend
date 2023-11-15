@@ -4,7 +4,7 @@ import {
   registerValidation,
   loginValidation,
   handleValidationErrors,
-} from "../utils/validation.js";
+} from "../validation/validation.js";
 import checkAuth from "../utils/checkAuth.js";
 
 const router = express.Router();
