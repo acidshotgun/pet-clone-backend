@@ -2,7 +2,13 @@ import PostModel from "../models/Post.js";
 import UserModel from "../models/User.js";
 import CommentModel from "../models/Comment.js";
 
-import { createPost, removePost } from "../utils/postUtils.js";
+import {
+  createPost,
+  removePost,
+  updatePost,
+  getAllPosts,
+  getOnePost,
+} from "../utils/postUtils.js";
 
 // Создание поста
 const create = async (req, res) => {
@@ -31,6 +37,55 @@ const remove = async (req, res) => {
     res.json({
       message: result.message,
     });
+  } else {
+    res.status(400).json({
+      message: result.message,
+    });
+  }
+};
+
+// Изменение поста
+const update = async (req, res) => {
+  const authorId = req.userId;
+  const postId = req.params.post_id;
+  const data = req.body;
+
+  const result = await updatePost(authorId, postId, data, PostModel);
+
+  if (result.success) {
+    res.json({
+      message: result.message,
+    });
+  } else {
+    res.status(400).json({
+      message: result.message,
+    });
+  }
+};
+
+// Получить все
+const getAll = async (req, res) => {
+  const authorId = req.params.user_id;
+
+  const result = await getAllPosts(authorId, PostModel);
+
+  if (result.success) {
+    res.json(result.data);
+  } else {
+    res.status(400).json({
+      message: result.message,
+    });
+  }
+};
+
+// Получить один
+const getOne = async (req, res) => {
+  const postId = req.params.post_id;
+
+  const result = await getOnePost(postId, PostModel);
+
+  if (result.success) {
+    res.json(result.data);
   } else {
     res.status(400).json({
       message: result.message,
@@ -86,52 +141,52 @@ const remove = async (req, res) => {
 //          автор поста === авторизированный юзер => ОК
 //    2) Проверить наличие поста - не лишнее
 //    3) Изменить пост
-const update = async (req, res) => {
-  try {
-    const postId = req.params.id;
-    const userId = req.userId;
+// const update = async (req, res) => {
+//   try {
+//     const postId = req.params.id;
+//     const userId = req.userId;
 
-    // Проверка, что именно автор пытается изменить свой пост
-    // Сравниеваем id из токена и id автора поста
-    const postForUpdate = await PostModel.findById(postId);
+//     // Проверка, что именно автор пытается изменить свой пост
+//     // Сравниеваем id из токена и id автора поста
+//     const postForUpdate = await PostModel.findById(postId);
 
-    if (!postForUpdate) {
-      return res.status(400).json({
-        message: `Пост ${postId} не найден.`,
-      });
-    }
+//     if (!postForUpdate) {
+//       return res.status(400).json({
+//         message: `Пост ${postId} не найден.`,
+//       });
+//     }
 
-    // toString() иначе там будет new ObjectId("id автора")
-    if (postForUpdate.author.toString() !== userId) {
-      return res.status(400).json({
-        message: "Вы не можете изменить этот пост.",
-      });
-    }
+//     // toString() иначе там будет new ObjectId("id автора")
+//     if (postForUpdate.author.toString() !== userId) {
+//       return res.status(400).json({
+//         message: "Вы не можете изменить этот пост.",
+//       });
+//     }
 
-    await PostModel.findByIdAndUpdate(
-      postId,
-      {
-        author: req.userId,
-        title: req.body.title,
-        text: req.body.text,
-        imageUrl: req.body.imageUrl,
-        tags: req.body.tags,
-      },
-      {
-        new: true,
-      }
-    );
+//     await PostModel.findByIdAndUpdate(
+//       postId,
+//       {
+//         author: req.userId,
+//         title: req.body.title,
+//         text: req.body.text,
+//         imageUrl: req.body.imageUrl,
+//         tags: req.body.tags,
+//       },
+//       {
+//         new: true,
+//       }
+//     );
 
-    res.json({
-      message: `Пост ${postId} изменен`,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      message: "Не удалось изменить пост",
-    });
-  }
-};
+//     res.json({
+//       message: `Пост ${postId} изменен`,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({
+//       message: "Не удалось изменить пост",
+//     });
+//   }
+// };
 
 // Удаление поста + проверки
 //    1) Существиует ли пост
@@ -197,54 +252,54 @@ const update = async (req, res) => {
 // };
 
 // Получение всех постов
-const getAll = async (req, res) => {
-  try {
-    const posts = await PostModel.find()
-      .sort({ createdAt: -1 })
-      .populate("author");
+// const getAll = async (req, res) => {
+//   try {
+//     const posts = await PostModel.find()
+//       .sort({ createdAt: -1 })
+//       .populate("author");
 
-    res.json(posts);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      message: "Не удалось получить посты",
-    });
-  }
-};
+//     res.json(posts);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({
+//       message: "Не удалось получить посты",
+//     });
+//   }
+// };
 
 // Получить один пост
 // + обновить счетсчик просмотров
-const getOne = async (req, res) => {
-  try {
-    const postId = req.params.id;
+// const getOne = async (req, res) => {
+//   try {
+//     const postId = req.params.id;
 
-    const updatedPost = await PostModel.findByIdAndUpdate(
-      { _id: postId },
-      { $inc: { viewCounter: 1 } },
-      { new: true }
-    )
-      .populate("author")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "author",
-          select: "-passwordHash", // Исключить поле с паролем
-        },
-      });
+//     const updatedPost = await PostModel.findByIdAndUpdate(
+//       { _id: postId },
+//       { $inc: { viewCounter: 1 } },
+//       { new: true }
+//     )
+//       .populate("author")
+//       .populate({
+//         path: "comments",
+//         populate: {
+//           path: "author",
+//           select: "-passwordHash", // Исключить поле с паролем
+//         },
+//       });
 
-    if (!updatedPost) {
-      return res.status(404).json({
-        message: "Пост не найден",
-      });
-    }
+//     if (!updatedPost) {
+//       return res.status(404).json({
+//         message: "Пост не найден",
+//       });
+//     }
 
-    res.json(updatedPost);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Не удалось получить посты",
-    });
-  }
-};
+//     res.json(updatedPost);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       message: "Не удалось получить посты",
+//     });
+//   }
+// };
 
 export { create, remove, update, getAll, getOne };

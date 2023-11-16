@@ -51,6 +51,7 @@ export default router;
 
 ////////////////  ТЕСТ ПОКА
 
+// Создание поста борда
 router.post(
   "/dashboards/:dashboard_id/posts",
   checkAuth,
@@ -60,9 +61,32 @@ router.post(
   DasboardContentController.createDashboardPost
 );
 
+// Удаление поста борда
 router.delete(
   "/dashboards/:dashboard_id/posts/:post_id",
   checkAuth,
   checkUserRole,
   DasboardContentController.removeDashboardPost
+);
+
+// Изменение поста борда
+router.patch(
+  "/dashboards/:dashboard_id/posts/:post_id",
+  checkAuth,
+  checkUserRole,
+  createPostValidation,
+  handleValidationErrors,
+  DasboardContentController.updateDashboardPost
+);
+
+// Получить все посты борда
+router.get(
+  "/dashboards/:dashboard_id/posts",
+  DasboardContentController.getAllDashboardPosts
+);
+
+// Получить один пост
+router.get(
+  "/dashboards/posts/:post_id",
+  DasboardContentController.getOneDashboardPost
 );

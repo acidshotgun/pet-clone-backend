@@ -100,4 +100,123 @@ const removePost = async (postId, authorId, PostModel, AuthorModel) => {
   }
 };
 
-export { createPost, removePost };
+// Обновить пост
+const updatePost = async (authorId, postId, data, PostModel) => {
+  try {
+    // Проверка, что именно автор пытается изменить свой пост
+    // Сравниеваем id из токена и id автора поста
+    const postForUpdate = await PostModel.findById(postId);
+
+    if (!postForUpdate) {
+      return {
+        success: false,
+        message: `Пост ${postId} не найден.`,
+      };
+    }
+
+    // toString() иначе там будет new ObjectId("id автора")
+    if (postForUpdate.author.toString() !== authorId) {
+      return {
+        success: false,
+        message: "Только автор или сообщество может изменять посты.",
+      };
+    }
+
+    await PostModel.findByIdAndUpdate(
+      postId,
+      {
+        author: authorId,
+        title: data.title,
+        text: data.text,
+        imageUrl: data.imageUrl,
+        tags: data.tags,
+      },
+      {
+        new: true,
+      }
+    );
+
+    return {
+      success: true,
+      message: `Пост ${postId} изменен`,
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      success: false,
+      message: `Не удалось изменить пост ${postId}.`,
+    };
+  }
+};
+
+// Получить все посты
+const getAllPosts = async (authorId, PostModel) => {
+  try {
+    const posts = await PostModel.find({
+      author: authorId,
+    }).sort({ createdAt: -1 });
+    // .populate("author");
+
+    if (posts.length < 1) {
+      return {
+        success: false,
+        message: "Посты не найдены.11111",
+      };
+    }
+
+    return {
+      success: true,
+      data: posts,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "Не удалось получить посты.",
+    };
+  }
+};
+
+// Получить один пост
+const getOnePost = async (postId, PostModel) => {
+  try {
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      { _id: postId },
+      { $inc: { viewCounter: 1 } },
+      { new: true }
+    );
+    // .populate({
+    //   path: "author",
+    //   select: ["-passwordHash", "-createdPosts"],
+    // })
+    // .populate({
+    //   path: "comments",
+    //   populate: {
+    //     path: "author",
+    //     select: "-passwordHash", // Исключить поле с паролем
+    //   },
+    // });
+
+    if (!updatedPost) {
+      return {
+        success: false,
+        message: "Пост не найден",
+      };
+    }
+
+    return {
+      success: true,
+      data: updatedPost,
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      success: false,
+      message: "Не удалось получить пост.",
+    };
+  }
+};
+
+export { createPost, removePost, updatePost, getAllPosts, getOnePost };

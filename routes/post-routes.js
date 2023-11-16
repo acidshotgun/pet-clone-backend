@@ -22,17 +22,17 @@ router.delete("/posts/:post_id", checkAuth, PostController.remove);
 
 // Обновить пост
 router.patch(
-  "/posts/:id",
+  "/posts/:post_id",
   checkAuth,
   createPostValidation,
   handleValidationErrors,
   PostController.update
 );
 
-// Получить все посты
-router.get("/posts", PostController.getAll);
+// Получить все посты одного юзера
+router.get("/posts/:user_id", PostController.getAll);
 
 // Получить один пост
-router.get("/posts/:id", PostController.getOne);
+router.get("/user/posts/:post_id", PostController.getOne);
 
 export default router;
