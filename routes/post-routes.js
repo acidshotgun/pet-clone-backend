@@ -1,5 +1,5 @@
 import express from "express";
-import * as PostController from "../controllers/post-controller.js";
+import * as PostController from "../controllers/user/user-post-controller.js";
 import {
   createPostValidation,
   handleValidationErrors,
@@ -33,6 +33,6 @@ router.patch(
 router.get("/posts/:user_id", PostController.getAll);
 
 // Получить один пост
-router.get("/user/posts/:post_id", PostController.getOne);
+router.get("/user/:user_id/posts/:post_id", PostController.getOne);
 
 export default router;

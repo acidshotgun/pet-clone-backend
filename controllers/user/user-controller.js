@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-import UserModel from "../models/User.js";
+import UserModel from "../../models/User.js";
 
 // Регистрация
 const register = async (req, res) => {

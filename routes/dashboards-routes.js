@@ -87,6 +87,6 @@ router.get(
 
 // Получить один пост
 router.get(
-  "/dashboards/posts/:post_id",
+  "/dashboards/:dashboard_id/posts/:post_id",
   DasboardContentController.getOneDashboardPost
 );

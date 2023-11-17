@@ -1,6 +1,5 @@
-import PostModel from "../models/Post.js";
-import UserModel from "../models/User.js";
-import CommentModel from "../models/Comment.js";
+import PostModel from "../../models/Post.js";
+import UserModel from "../../models/User.js";
 
 import {
   createPost,
@@ -8,20 +7,20 @@ import {
   updatePost,
   getAllPosts,
   getOnePost,
-} from "../utils/postUtils.js";
+} from "../postUtils.js";
 
 // Создание поста
 const create = async (req, res) => {
-  try {
-    const authorId = req.userId; // req.params.dashboard_id
-    const data = req.body;
+  const authorId = req.userId; // req.params.dashboard_id
+  const data = req.body;
 
-    const post = await createPost(authorId, data, PostModel, UserModel);
-    res.json(post);
-  } catch (error) {
-    console.log(error);
+  const post = await createPost(authorId, data, PostModel, UserModel);
+
+  if (post.success) {
+    res.json(post.data);
+  } else {
     res.status(400).json({
-      message: "Не удалось создать пост.",
+      message: post.message,
     });
   }
 };
@@ -80,9 +79,10 @@ const getAll = async (req, res) => {
 
 // Получить один
 const getOne = async (req, res) => {
+  const authorId = req.params.user_id;
   const postId = req.params.post_id;
 
-  const result = await getOnePost(postId, PostModel);
+  const result = await getOnePost(authorId, postId, PostModel);
 
   if (result.success) {
     res.json(result.data);

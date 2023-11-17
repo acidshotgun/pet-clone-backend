@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 import CommentModel from "../models/Comment.js";
 
-// Создание
+// Создание поста
+// + добавление в объект создателя (юзер или борд)
 const createPost = async (authorId, data, PostModel, AuthorModel) => {
   const createPostSession = await mongoose.startSession();
   createPostSession.startTransaction();
@@ -26,22 +27,33 @@ const createPost = async (authorId, data, PostModel, AuthorModel) => {
 
     // без этой строки при создании поста у борда
     // author === null
-    await post.populate({ path: "author", model: AuthorModel });
+    await post.populate({
+      path: "author",
+      select: ["-passwordHash", "-createdPosts"],
+      model: AuthorModel,
+    });
 
     await createPostSession.commitTransaction();
     createPostSession.endSession();
 
-    return post;
+    return {
+      success: true,
+      data: post,
+    };
   } catch (error) {
     await createPostSession.abortTransaction();
     createPostSession.endSession();
 
     console.log(error);
-    throw new Error("Не удалось создать пост.");
+    return {
+      success: false,
+      message: "Не удалось создать пост.",
+    };
   }
 };
 
-// Удаление
+// Удаление поста
+// + удаление у его создателя (юзер или борд)
 const removePost = async (postId, authorId, PostModel, AuthorModel) => {
   const deletePostSessoin = await mongoose.startSession();
   deletePostSessoin.startTransaction();
@@ -179,10 +191,10 @@ const getAllPosts = async (authorId, PostModel) => {
 };
 
 // Получить один пост
-const getOnePost = async (postId, PostModel) => {
+const getOnePost = async (authorId, postId, PostModel) => {
   try {
-    const updatedPost = await PostModel.findByIdAndUpdate(
-      { _id: postId },
+    const updatedPost = await PostModel.findOneAndUpdate(
+      { _id: postId, author: authorId },
       { $inc: { viewCounter: 1 } },
       { new: true }
     );
