@@ -22,7 +22,7 @@ app.use(postRouter);
 app.use(commentsRouter);
 app.use(dashboardRouter);
 
-app.listen(process.env.PORT, (error) => {
+app.listen(process.env.PORT, process.env.HOST, (error) => {
   error
     ? console.log(error)
     : console.log(`Server started at ${process.env.PORT} port`);
