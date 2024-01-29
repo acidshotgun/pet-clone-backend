@@ -154,6 +154,9 @@ const getOne = async (req, res) => {
         select: "-passwordHash",
       })
       .populate({
+        path: "createdPosts",
+      })
+      .populate({
         path: "members",
         select: "-passwordHash",
       })
