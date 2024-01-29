@@ -113,4 +113,30 @@ const auth = async (req, res) => {
   }
 };
 
-export { register, login, auth };
+// Получить одного юзера
+const getOne = async (req, res) => {
+  try {
+    const userId = req.params.user_id;
+
+    const user = await UserModel.findById(userId)
+      .populate({
+        path: "createdPosts",
+      })
+      .select("-passwordHash");
+
+    if (!user) {
+      return res.status(400).json({
+        message: `Пользователь ${userId} не найден.`,
+      });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "Не удалось получить пользователя.",
+    });
+  }
+};
+
+export { register, login, auth, getOne };

@@ -25,4 +25,6 @@ router.post(
 
 router.get("/auth/me", checkAuth, UserController.auth);
 
+router.get("/users/:user_id", UserController.getOne);
+
 export default router;
