@@ -122,6 +122,9 @@ const getOne = async (req, res) => {
       .populate({
         path: "createdPosts",
       })
+      .populate({
+        path: "subscribedDashboards",
+      })
       .select("-passwordHash");
 
     if (!user) {
